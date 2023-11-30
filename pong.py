@@ -28,7 +28,7 @@ def check_bbox(bbox):
     return False
 
 def check_boundaries():
-    ball_next = (pong_data[0] += np.round(pong_data[2]), pong_data[1] += np.round(pong_data[3]))
+    ball_next = (pong_data[0] + np.round(pong_data[2]), pong_data[1] + np.round(pong_data[3]))
     if ball_next[1] <= 0 or ball_next[1] >= 1080:
         pong_data[3] *= -1
     if ball_next[0] <= 0 or ball_next[0] >= 1080:
