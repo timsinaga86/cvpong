@@ -132,6 +132,7 @@ def main():
         is_col_bbox1 = pong.check_bbox(bbox)
         if is_col_bbox1:
             theta = get_hand_angle(bbox, frame)
+            if theta > math.pi/2: theta+= math.pi
             print(theta)
             #Calc velocity
             mag = pong.velocity_magnitude()
@@ -142,6 +143,7 @@ def main():
         is_col_bbox2 = pong.check_bbox(bbox2)
         if is_col_bbox2:
             theta = get_hand_angle(bbox2, frame)
+            if theta > math.pi/2: theta+= math.pi
             #Calc velocity
             mag = pong.velocity_magnitude()
             print(theta)
