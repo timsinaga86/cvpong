@@ -36,5 +36,5 @@ def check_boundaries():
     
 
 def reset():
-    pong_data[2] = np.randint(-25, 26), np.randint(-25, 26)
-    pong_data[3] = np.randint(-25, 26), np.randint(-25, 26)
+    pong_data[2] = np.random.randint(-25, 26), np.random.randint(-25, 26)
+    pong_data[3] = np.random.randint(-25, 26), np.random.randint(-25, 26)
