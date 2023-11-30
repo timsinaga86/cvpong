@@ -22,7 +22,7 @@ def draw(show_frame):
     cv2.circle(show_frame,(pong_data[0], pong_data[1]), radius, (255, 0, 0), -1)
 
 def check_bbox(bbox):
-    ball_next = (pong_data[0] += np.round(pong_data[2]), pong_data[1] += np.round(pong_data[3]))
+    ball_next = (pong_data[0] + np.round(pong_data[2]), pong_data[1] + np.round(pong_data[3]))
     if (bbox[0] <= ball_next[0] and bbox[0] + bbox[2] >= ball_next[0]) and (bbox[1] <= ball_next[1] and bbox[1] + bbox[3] >= ball_next[1]):
         return True
     return False
