@@ -132,6 +132,11 @@ def main():
             #img.save('outhsvtest.bmp')
             #cv2.imshow('Segmentation', img)
             cv2.imwrite('segmentation.jpg', cv2.cvtColor(img, cv2.COLOR_HSV2BGR))
+            edge = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_HSV2BGR),50, 150)
+            cv2.imshow('edge', edge)
+            while True:
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             break
     # while True:
     #     # Read a new frame
