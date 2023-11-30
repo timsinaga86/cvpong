@@ -126,63 +126,94 @@ def main():
         # desired button of your choice 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             # Initialize tracker with first frame and bounding box
-            # ok = tracker.init(frame, bbox)
-            # ok = tracker2.init(frame, bbox2)
-            img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
-            #img.save('outhsvtest.bmp')
-            #cv2.imshow('Segmentation', img)
-            cv2.imwrite('segmentation.jpg', cv2.cvtColor(img, cv2.COLOR_HSV2BGR))
-            edge = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_HSV2BGR),50, 150)
-            cv2.imshow('edge', edge)
-            while True:
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            break
-    # while True:
-    #     # Read a new frame
-    #     ok, new_frame = video.read()
-    #     if not ok:
-    #         continue
-         
-    #     # Start timer
-    #     timer = cv2.getTickCount()
- 
-    #     # Update tracker
-    #     ok1, bbox = tracker.update(new_frame)
-    #     ok2, bbox2 = tracker2.update(new_frame)
- 
-    #     # Calculate Frames per second (FPS)
-    #     fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
- 
-    #     # Draw bounding box
-    #     if ok1 and ok2:
-    #         # Tracking success
-    #         p1 = (int(bbox[0]), int(bbox[1]))
-    #         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-    #         cv2.rectangle(new_frame, p1, p2, (0,0,255), 2, 1)
-    #         p3 = (int(bbox2[0]), int(bbox2[1]))
-    #         p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
-    #         cv2.rectangle(new_frame, p3, p4, (0,0,255), 2, 1)
-    #         show_frame = cv2.flip(new_frame, 1)
-    #     else :
-    #         # Tracking 
-    #         cv2.rectangle(new_frame, p1, p2, (0,0,255), 2, 1)
-    #         cv2.rectangle(new_frame, p3, p4, (0,0,255), 2, 1)
-    #         show_frame = cv2.flip(new_frame, 1)
-    #         if not ok1:
-    #             cv2.putText(show_frame, "Tracking 1 failure detected", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
-    #         if not ok2:
-    #             cv2.putText(show_frame, "Tracking 2 failure detected", (1500,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
+            ok = tracker.init(frame, bbox)
+            ok = tracker2.init(frame, bbox2)
+            # img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
+            # #img.save('outhsvtest.bmp')
+            # #cv2.imshow('Segmentation', img)
+            # edge = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_HSV2BGR),150, 250)
+            # #cv2.circle(edge, (round(centroid[1]), round(centroid[0])), 3, (255,0,0), -1)
+            # votes = 50
+            # lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
+            # # Draw lines on the image
+            # rho_avg = 0
+            # theta_avg = 0
+            # count = 0
+            # while lines is None:
+            #     votes -= 1
+            #     lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
+            #     print(votes)
+            # for line in lines:
+            #     print(line)
+            #     rho,theta = line[0]
+            #     rho_avg += rho
+            #     theta_avg += theta
+            #     count += 1
+            #     a = np.cos(theta)
+            #     b = np.sin(theta)
+            #     x0 = a*rho
+            #     y0 = b*rho
+            #     x1 = int(x0 + 1000*(-b))
+            #     y1 = int(y0 + 1000*(a))
+            #     x2 = int(x0 - 1000*(-b))
+            #     y2 = int(y0 - 1000*(a))
+            #     cv2.line(edge,(x1,y1),(x2,y2),(255,0,0),2)
+            # theta_avg = theta_avg/count
+            # rho_avg = rho_avg/count
+            # print(rho_avg, theta_avg)
+            # a = np.cos(theta_avg)
+            # b = np.sin(theta_avg)
+            # x0 = a*rho_avg
+            # y0 = b*rho_avg
+            # x1 = int(x0 + 1000*(-b))
+            # y1 = int(y0 + 1000*(a))
+            # x2 = int(x0 - 1000*(-b))
+            # y2 = int(y0 - 1000*(a))
+            # #cv2.line(edge,(x1,y1),(x2,y2),(255,0,0),2)
+            
+            # cv2.imshow('houghlines3.jpg',edge)
 
+
+            # #cv2.imshow('edge', edge)
+            # while True:
+            #     if cv2.waitKey(1) & 0xFF == ord('q'):
+            #         break
+            break
+    while True:
+        # Read a new frame
+        ok, new_frame = video.read()
+        if not ok:
+            continue
+         
+        # Start timer
+        timer = cv2.getTickCount()
+ 
+        # Update tracker
+        ok1, bbox = tracker.update(new_frame)
+        ok2, bbox2 = tracker2.update(new_frame)
+ 
+        # Draw bounding box
+        if ok1:
+            p1 = (int(bbox[0]), int(bbox[1]))
+            p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+        cv2.rectangle(new_frame, p1, p2, (0,0,255), 2, 1)
+        if ok2:
+            # Tracking success 
+            p3 = (int(bbox2[0]), int(bbox2[1]))
+            p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
+        cv2.rectangle(new_frame, p3, p4, (0,0,255), 2, 1)
+
+        
+        show_frame = cv2.flip(new_frame, 1)
 
      
  
-    #     # Display result
-    #     cv2.imshow("Tracking", show_frame)
+        # Display result
+        cv2.imshow("Tracking", show_frame)
  
-    #     # Exit if ESC pressed
-    #     k = cv2.waitKey(1) & 0xff
-    #     if k == 27 : break
+        # Exit if ESC pressed
+        k = cv2.waitKey(1) & 0xff
+        if k == 27 : break
 
     # # After the loop release the cap object 
     video.release() 
