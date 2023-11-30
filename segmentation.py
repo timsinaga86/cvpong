@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from PIL import Image
+import cv2
 
 train_files = ['skin1.jpg', 'skin2.jpg', 'skin3.jpg', 'skin4.jpg', 'skin5.jpg', 'skin6.jpg']
 test_files = ['gun1.bmp', 'joy1.bmp', 'pointer1.bmp']
@@ -14,12 +15,16 @@ def skin_hsv(img, threshold):
                 pixels.append(img[y][x])
     return pixels
 
-def segmentation_hsv(img):
-    pixels=[]
+def segmentation_train():
+    pixels = []
     for file in train_files:
         img_train = Image.open(file)
         img_train = np.array(img_train.convert('HSV'))
         pixels += skin_hsv(img_train, 75)
+    return pixels
+
+def segmentation_hsv(img):
+    pixels = segmentation_train()
     pixels = np.array(pixels)
 
     hist = np.histogram2d(pixels[:,0], pixels[:,1], 256)[0]
@@ -32,7 +37,10 @@ def segmentation_hsv(img):
         for x in range(height):
             if hist[img[y][x][0]][img[y][x][1]] > 0.0015:
                 new_img[y][x] = img[y][x]
-    return Image.fromarray(new_img, mode="HSV")
+    #return Image.fromarray(new_img)
+    #return_img = Image.fromarray(new_img, mode="HSV")
+    #return_img = cv2.cvtColor(new_img, cv2.COLOR_HSV2BGR)
+    return new_img
 
 # for file in test_files:
 #     img = Image.open(file)
@@ -68,7 +76,7 @@ def segmentation_rgb(img):
                 new_img[y][x] = img[y][x]
     return Image.fromarray(new_img, mode="RGB")
 
-for file in test_files:
-    img = Image.open(file)
-    img = segmentation_rgb(np.array(img))
-    img.save('outrgb'+file)
+# for file in test_files:
+#     img = Image.open(file)
+#     img = segmentation_rgb(np.array(img))
+#     img.save('outrgb'+file)
