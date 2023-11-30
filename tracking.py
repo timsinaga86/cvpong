@@ -63,7 +63,7 @@ def draw_bounding_box(frame, bbox, save_path, frame_num):
 
 
 def main():
-    images_folder = 'image_girl/image_girl'
+    vid = cv2.VideoCapture(1) 
     result_folder = 'result_folder_ssd'
     output_path = 'output_video_ssd.avi'
     x = 45
@@ -74,7 +74,7 @@ def main():
 
     os.makedirs(result_folder, exist_ok=True)
 
-    frame = cv2.imread(os.path.join(images_folder, '0001.jpg'))
+    frame = vid.read()
     bbox = (x, y, width, height)
     draw_bounding_box(frame, bbox, result_folder, 1)
     frame_width, frame_height = frame.shape[1], frame.shape[0]

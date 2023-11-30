@@ -5,7 +5,6 @@ import cv2
 
 train_files = ['skin1.jpg', 'skin2.jpg', 'skin3.jpg', 'skin4.jpg', 'skin5.jpg', 'skin6.jpg']
 test_files = ['gun1.bmp', 'joy1.bmp', 'pointer1.bmp']
-
 def skin_hsv(img, threshold):
     pixels = []
     width, height = img.shape[0], img.shape[1]
@@ -23,9 +22,7 @@ def segmentation_train():
         pixels += skin_hsv(img_train, 75)
     return pixels
 
-def segmentation_hsv(img):
-    pixels = segmentation_train()
-    pixels = np.array(pixels)
+def segmentation_hsv(img, pixels):
 
     hist = np.histogram2d(pixels[:,0], pixels[:,1], 256)[0]
 

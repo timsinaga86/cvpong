@@ -96,7 +96,9 @@ def main():
             tracker = cv2.TrackerMOSSE_create()
         if tracker_type == "CSRT":
             tracker = cv2.TrackerCSRT_create()
-    video = cv2.VideoCapture(2) 
+    video = cv2.VideoCapture(1)
+    pixels = seg.segmentation_train()
+    pixels = np.array(pixels)
     while(True): 
         
         # Capture the video frame 
@@ -109,16 +111,15 @@ def main():
         ret,frame = video.read()
         bbox = (x, y, width, height)
         bbox2 = (1600, 400, width, height)
-
+        show_frame = np.copy(frame)
         # Display the resulting frame 
-        
         p1 = (int(bbox[0]), int(bbox[1]))
         p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-        cv2.rectangle(frame, p1, p2, (0,0,255), 2, 1)
+        cv2.rectangle(show_frame , p1, p2, (0,0,255), 2, 1)
         p3 = (int(bbox2[0]), int(bbox2[1]))
         p4= (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
-        cv2.rectangle(frame, p3, p4, (0,0,255), 2, 1)
-        show_frame = cv2.flip(frame, 1)
+        cv2.rectangle(show_frame , p3, p4, (0,0,255), 2, 1)
+        show_frame = cv2.flip(show_frame , 1)
         cv2.imshow('frame', show_frame) 
         # the 'q' button is set as the 
         # quitting button you may use any 
@@ -127,10 +128,10 @@ def main():
             # Initialize tracker with first frame and bounding box
             # ok = tracker.init(frame, bbox)
             # ok = tracker2.init(frame, bbox2)
-            img = seg.segmentation_hsv(np.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
+            img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
             #img.save('outhsvtest.bmp')
             #cv2.imshow('Segmentation', img)
-            cv2.imwrite('segmentation.jpg', img)
+            cv2.imwrite('segmentation.jpg', cv2.cvtColor(img, cv2.COLOR_HSV2BGR))
             break
     # while True:
     #     # Read a new frame
