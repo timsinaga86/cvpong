@@ -2,71 +2,50 @@
 import cv2
 import numpy as np
 import segmentation as seg
+import pong
+import math
 
 train_files = ['skin1.jpg', 'skin2.jpg', 'skin3.jpg', 'skin4.jpg', 'skin5.jpg', 'skin6.jpg']
 
-def draw_bounding_box(frame, bbox):
-    if len(bbox) == 2:
-        x, y = bbox
-        w, h = 100, 200
-    elif len(bbox) == 4:
-        x, y, w, h = bbox
-    else:
-        raise ValueError("Invalid bounding box format.")
-    x = max(0, x)
-    y = max(0, y)
-    w = min(frame.shape[1] - x, w)
-    h = min(frame.shape[0] - y, h)
+# def draw_bounding_box(frame, bbox):
+#     if len(bbox) == 2:
+#         x, y = bbox
+#         w, h = 100, 200
+#     elif len(bbox) == 4:
+#         x, y, w, h = bbox
+#     else:
+#         raise ValueError("Invalid bounding box format.")
+#     x = max(0, x)
+#     y = max(0, y)
+#     w = min(frame.shape[1] - x, w)
+#     h = min(frame.shape[0] - y, h)
 
-    frame_with_bbox = frame.copy()
-    cv2.rectangle(frame_with_bbox, (x, y), (x + w, y + h), (0, 0, 255), 2)
-    cv2.imshow('Frame with Bounding Box', frame_with_bbox)
-"""
+#     frame_with_bbox = frame.copy()
+#     cv2.rectangle(frame_with_bbox, (x, y), (x + w, y + h), (0, 0, 255), 2)
+#     cv2.imshow('Frame with Bounding Box', frame_with_bbox)
 
-def image_matching(template, search_region, method):
-    template_resized = cv2.resize(template, (search_region.shape[1], search_region.shape[0]))
+def get_hand_angle(bbox, frame):
+    img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
+    edge = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_HSV2BGR),150, 250)
+    votes = 50
+    lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
+    theta_avg = 0
+    count = 0
+    while lines is None:
+        votes -= 1
+        lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
+        if votes == 0:
+            return 0
+    for line in lines:
+        r, theta = line[0]
+        theta_avg += theta
+        count += 1
 
-    if method == 'sum_squared_difference':
-        result = np.sum(np.square(template_resized - search_region))
-    elif method == 'cross_correlation':
-        result = np.sum(template_resized * search_region)
-    elif method == 'normalized_cross_correlation':
-        result = np.sum(template_resized * search_region) / (np.sqrt(np.sum(template_resized**2)) * np.sqrt(np.sum(search_region**2)))
-    else:
-        raise ValueError("Invalid matching method.")
-
-    return result
+    theta_avg = theta_avg/count
+    return theta_avg
+        
 
 
-def local_exhaustive_search(frame, template, bbox, method):
-    if len(bbox) == 2:
-        x, y = bbox
-        w, h = 100, 200
-    elif len(bbox) == 4:
-        x, y, w, h = bbox
-    else:
-        raise ValueError("Invalid bounding box format.")
-    search_region = frame[y-1:y+h+1, x-1:x+w+1]
-
-    min_score = np.inf
-    best_match = (x, y)
-
-    for i in range(-100, 100):
-        for j in range(-100, 100):
-            shifted_region = frame[y-1+j:y+h+1+j, x-1+i:x+w+1+i]
-
-            if shifted_region.shape == search_region.shape:
-                score = image_matching(template, shifted_region, method)
-                if score < min_score:
-                    min_score = score
-                    best_match = (x+i, y+j)
-
-    return best_match
-    """
-import cv2
-import sys
- 
-# define a video capture object 
 def main():
     (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
  
@@ -97,8 +76,6 @@ def main():
         if tracker_type == "CSRT":
             tracker = cv2.TrackerCSRT_create()
     video = cv2.VideoCapture(1)
-    pixels = seg.segmentation_train()
-    pixels = np.array(pixels)
     while(True): 
         
         # Capture the video frame 
@@ -128,65 +105,13 @@ def main():
             # Initialize tracker with first frame and bounding box
             ok = tracker.init(frame, bbox)
             ok = tracker2.init(frame, bbox2)
-            # img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
-            # #img.save('outhsvtest.bmp')
-            # #cv2.imshow('Segmentation', img)
-            # edge = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_HSV2BGR),150, 250)
-            # #cv2.circle(edge, (round(centroid[1]), round(centroid[0])), 3, (255,0,0), -1)
-            # votes = 50
-            # lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
-            # # Draw lines on the image
-            # rho_avg = 0
-            # theta_avg = 0
-            # count = 0
-            # while lines is None:
-            #     votes -= 1
-            #     lines = cv2.HoughLines(edge, 1, np.pi/180, votes)
-            #     print(votes)
-            # for line in lines:
-            #     print(line)
-            #     rho,theta = line[0]
-            #     rho_avg += rho
-            #     theta_avg += theta
-            #     count += 1
-            #     a = np.cos(theta)
-            #     b = np.sin(theta)
-            #     x0 = a*rho
-            #     y0 = b*rho
-            #     x1 = int(x0 + 1000*(-b))
-            #     y1 = int(y0 + 1000*(a))
-            #     x2 = int(x0 - 1000*(-b))
-            #     y2 = int(y0 - 1000*(a))
-            #     cv2.line(edge,(x1,y1),(x2,y2),(255,0,0),2)
-            # theta_avg = theta_avg/count
-            # rho_avg = rho_avg/count
-            # print(rho_avg, theta_avg)
-            # a = np.cos(theta_avg)
-            # b = np.sin(theta_avg)
-            # x0 = a*rho_avg
-            # y0 = b*rho_avg
-            # x1 = int(x0 + 1000*(-b))
-            # y1 = int(y0 + 1000*(a))
-            # x2 = int(x0 - 1000*(-b))
-            # y2 = int(y0 - 1000*(a))
-            # #cv2.line(edge,(x1,y1),(x2,y2),(255,0,0),2)
-            
-            # cv2.imshow('houghlines3.jpg',edge)
-
-
-            # #cv2.imshow('edge', edge)
-            # while True:
-            #     if cv2.waitKey(1) & 0xFF == ord('q'):
-            #         break
             break
+    pong.reset()
     while True:
         # Read a new frame
         ok, new_frame = video.read()
         if not ok:
             continue
-         
-        # Start timer
-        timer = cv2.getTickCount()
  
         # Update tracker
         ok1, bbox = tracker.update(new_frame)
@@ -203,17 +128,42 @@ def main():
             p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
         cv2.rectangle(new_frame, p3, p4, (0,0,255), 2, 1)
 
-        
+        #Check collisions
+        is_col_bbox1 = pong.check_bbox(bbox)
+        if is_col_bbox1:
+            theta = get_hand_angle(bbox, frame)
+            print(theta)
+            #Calc velocity
+            mag = pong.velocity_magnitude()
+            vx = round(math.cos(theta)*mag)
+            vy = round(math.sin(theta)*mag)
+            (vx,vy)
+            pong.update_velocity(vx,vy)
+        is_col_bbox2 = pong.check_bbox(bbox2)
+        if is_col_bbox2:
+            theta = get_hand_angle(bbox2, frame)
+            #Calc velocity
+            mag = pong.velocity_magnitude()
+            print(theta)
+            vx = -round(math.cos(theta)*mag)
+            vy = round(math.sin(theta)*mag)
+            print(vx,vy)
+            pong.update_velocity(vx,vy)
+
+
+        pong.check_boundaries()
+        pong.draw(new_frame)
         show_frame = cv2.flip(new_frame, 1)
 
      
  
         # Display result
-        cv2.imshow("Tracking", show_frame)
+        cv2.imshow("Pong", show_frame)
  
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
         if k == 27 : break
+        if k == ord('r'): pong.reset()
 
     # # After the loop release the cap object 
     video.release() 
@@ -221,4 +171,6 @@ def main():
     cv2.destroyAllWindows() 
 
 if __name__ == "__main__":
+    pixels = seg.segmentation_train()
+    pixels = np.array(pixels)
     main()
