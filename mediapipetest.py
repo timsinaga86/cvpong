@@ -6,10 +6,11 @@ import pong
 import math
 import mediapipe as mp
 import smediapype as smp
-        
+
 def main():
     (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
- 
+    normal_vector_r = [0,0]
+    normal_vector_l = [0,0]
     mp_holistic = mp.solutions.holistic
     holistic_model = mp_holistic.Holistic(
         min_detection_confidence=0.5,
@@ -33,15 +34,12 @@ def main():
         y = 400
         width = 100
         height = 200
-        bbox = (x, y, width, height)
-        bbox2 = (1600, 400, width, height)
+        bbox = [x, y, width, height]
+        bbox2 = [1600, 400, width, height]
         # Read a new frame
         ok, new_frame = video.read()
-        print(ok)
         if not ok:
             continue
-
-        print("stuck 1")
         # Draw bounding box
         # resizing the frame for better view
         #frame = cv2.resize(frame, (800, 600))
@@ -87,11 +85,11 @@ def main():
         bbox[1] = normal_vector_r[1]
         bbox2[0] = normal_vector_l[0]
         bbox[1] = normal_vector_l[1]
-        if normal_vector_r:
+        if normal_vector_r is not None:
             p1 = (int(bbox[0]), int(bbox[1]))
             p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
         cv2.rectangle(new_frame, p1, p2, (0,0,255), 2, 1)
-        if normal_vector_l:
+        if normal_vector_l is not None:
             # Tracking success 
             p3 = (int(bbox2[0]), int(bbox2[1]))
             p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
@@ -140,6 +138,4 @@ def main():
     cv2.destroyAllWindows() 
 
 if __name__ == "__main__":
-    pixels = seg.segmentation_train()
-    pixels = np.array(pixels)
     main()
