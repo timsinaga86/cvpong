@@ -7,22 +7,6 @@ import math
 
 train_files = ['skin1.jpg', 'skin2.jpg', 'skin3.jpg', 'skin4.jpg', 'skin5.jpg', 'skin6.jpg']
 
-# def draw_bounding_box(frame, bbox):
-#     if len(bbox) == 2:
-#         x, y = bbox
-#         w, h = 100, 200
-#     elif len(bbox) == 4:
-#         x, y, w, h = bbox
-#     else:
-#         raise ValueError("Invalid bounding box format.")
-#     x = max(0, x)
-#     y = max(0, y)
-#     w = min(frame.shape[1] - x, w)
-#     h = min(frame.shape[0] - y, h)
-
-#     frame_with_bbox = frame.copy()
-#     cv2.rectangle(frame_with_bbox, (x, y), (x + w, y + h), (0, 0, 255), 2)
-#     cv2.imshow('Frame with Bounding Box', frame_with_bbox)
 
 def get_hand_angle(bbox, frame):
     img = seg.segmentation_hsv(cv2.cvtColor(frame[bbox[1]: bbox[1] + bbox[3],bbox[0]:bbox[0]+bbox[2]], cv2.COLOR_BGR2HSV), pixels)
@@ -51,30 +35,9 @@ def main():
  
     # Set up tracker.
     # Instead of MIL, you can also use
- 
-    tracker_types = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
-    tracker_type = tracker_types[2]
- 
-    if int(minor_ver) < 3:
-        tracker = cv2.Tracker_create(tracker_type)
-    else:
-        if tracker_type == 'BOOSTING':
-            tracker = cv2.TrackerBoosting_create()
-        if tracker_type == 'MIL':
-            tracker = cv2.TrackerMIL_create()
-        if tracker_type == 'KCF':
-            tracker = cv2.TrackerKCF_create()
-            tracker2 = cv2.TrackerKCF_create()
-        if tracker_type == 'TLD':
-            tracker = cv2.TrackerTLD_create()
-        if tracker_type == 'MEDIANFLOW':
-            tracker = cv2.TrackerMedianFlow_create()
-        if tracker_type == 'GOTURN':
-            tracker = cv2.TrackerGOTURN_create()
-        if tracker_type == 'MOSSE':
-            tracker = cv2.TrackerMOSSE_create()
-        if tracker_type == "CSRT":
-            tracker = cv2.TrackerCSRT_create()
+    tracker = cv2.TrackerKCF_create()
+    tracker2 = cv2.TrackerKCF_create()
+
     video = cv2.VideoCapture(1)
     while(True): 
         
@@ -160,7 +123,7 @@ def main():
      
  
         # Display result
-        cv2.imshow("Pong", show_frame)
+        cv2.imshow("frame", show_frame)
  
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff

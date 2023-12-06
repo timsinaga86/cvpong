@@ -7,6 +7,13 @@ import math
 import mediapipe as mp
 import smediapype as smp
 
+
+def get_hand_angle(normal_vector):
+    theta_avg = np.arctan(normal_vector[1]/normal_vector[0])
+    print(theta_avg)
+    return theta_avg
+
+
 def main():
     (major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
     normal_vector_r = [0,0]
@@ -29,13 +36,16 @@ def main():
     #         break
     # print("before pong reset")
     pong.reset()
+    x = 300
+    y = 400
+    width = 100
+    height = 200
+    bbox = [x, y, width, height]
+    bbox2 = [1600, 400, width, height]
+    r_avg = [0,0]
+    l_avg = [0,0]
+    count = 0
     while True:
-        x = 300
-        y = 400
-        width = 100
-        height = 200
-        bbox = [x, y, width, height]
-        bbox2 = [1600, 400, width, height]
         # Read a new frame
         ok, new_frame = video.read()
         if not ok:
@@ -77,14 +87,17 @@ def main():
             keypoints_l, keypoints_r = smp.extract_keypoints(results)
             if keypoints_r[0].size > 1:
                 normal_vector_r = np.cross(np.subtract(keypoints_r[17],keypoints_r[0]), np.subtract(keypoints_r[5],keypoints_r[17]))
-                print("right: " + str(normal_vector_r))
+                #print("right: " + str(normal_vector_r))
+                r_avg = [np.mean([keypoints_r[0,0],keypoints_r[5,0],keypoints_r[17,0]]),np.mean([keypoints_r[0,1],keypoints_r[5,1],keypoints_r[17,1]])]
             if keypoints_l[0].size > 1:
                 normal_vector_l = np.cross(np.subtract(keypoints_l[17],keypoints_l[0]), np.subtract(keypoints_l[5],keypoints_l[17]))
-                print("left: " + str(normal_vector_l))
-        bbox[0] = normal_vector_r[0]
-        bbox[1] = normal_vector_r[1]
-        bbox2[0] = normal_vector_l[0]
-        bbox2[1] = normal_vector_l[1]
+                l_avg = [np.mean([keypoints_l[0,0],keypoints_l[5,0],keypoints_l[17,0]]),np.mean([keypoints_l[0,1],keypoints_l[5,1],keypoints_l[17,1]])]
+                #print("left: " + str(normal_vector_l))
+        bbox[0] = (r_avg[0] * 1920) - width/2
+        bbox[1] = (r_avg[1] * 1080) - height/2
+        bbox2[0] = (l_avg[0] * 1920) - width/2
+        bbox2[1] = (l_avg[1] * 1080) - height/2
+        #print(bbox)
         if normal_vector_r is not None:
             p1 = (int(bbox[0]), int(bbox[1]))
             p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
@@ -95,29 +108,27 @@ def main():
             p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
         cv2.rectangle(image, p3, p4, (0,0,255), 2, 1)
 
-        # #Check collisions
-        # is_col_bbox1 = pong.check_bbox(bbox)
-        # if is_col_bbox1:
-        #     theta = get_hand_angle(bbox, frame)
-        #     if theta > math.pi/2: theta+= math.pi
-        #     print(theta)
-        #     #Calc velocity
-        #     mag = pong.velocity_magnitude()
-        #     vx = round(math.cos(theta)*mag)
-        #     vy = round(math.sin(theta)*mag)
-        #     (vx,vy)
-        #     pong.update_velocity(vx,vy)
-        # is_col_bbox2 = pong.check_bbox(bbox2)
-        # if is_col_bbox2:
-        #     theta = get_hand_angle(bbox2, frame)
-        #     if theta > math.pi/2: theta+= math.pi
-        #     #Calc velocity
-        #     mag = pong.velocity_magnitude()
-        #     print(theta)
-        #     vx = -round(math.cos(theta)*mag)
-        #     vy = round(math.sin(theta)*mag)
-        #     print(vx,vy)
-        #     pong.update_velocity(vx,vy)
+        #Check collisions
+        is_col_bbox1 = pong.check_bbox(bbox)
+        if is_col_bbox1:
+            theta = get_hand_angle(normal_vector_r)
+            if theta > math.pi/2: theta+= math.pi
+            #print(theta)
+            #Calc velocity
+            mag = pong.velocity_magnitude()
+            vx = round(math.cos(theta)*mag)
+            vy = round(math.sin(theta)*mag)
+            pong.update_velocity(vx,vy)
+        is_col_bbox2 = pong.check_bbox(bbox2)
+        if is_col_bbox2:
+            theta = get_hand_angle(normal_vector_l)
+            if theta > math.pi/2: theta+= math.pi
+            #Calc velocity
+            mag = pong.velocity_magnitude()
+            #print(theta)
+            vx = -round(math.cos(theta)*mag)
+            vy = round(math.sin(theta)*mag)
+            pong.update_velocity(vx,vy)
 
 
         pong.check_boundaries()
@@ -131,6 +142,11 @@ def main():
         k = cv2.waitKey(1) & 0xff
         if k == 27 : break
         if k == ord('r'): pong.reset()
+        if k = ord('s'): 
+            cv2.imwrite("test"+str(count)+".png", image)
+            count += 1
+
+
 
     # # After the loop release the cap object 
     video.release() 
