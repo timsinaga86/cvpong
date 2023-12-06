@@ -84,16 +84,16 @@ def main():
         bbox[0] = normal_vector_r[0]
         bbox[1] = normal_vector_r[1]
         bbox2[0] = normal_vector_l[0]
-        bbox[1] = normal_vector_l[1]
+        bbox2[1] = normal_vector_l[1]
         if normal_vector_r is not None:
             p1 = (int(bbox[0]), int(bbox[1]))
             p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-        cv2.rectangle(new_frame, p1, p2, (0,0,255), 2, 1)
+        cv2.rectangle(image, p1, p2, (0,0,255), 2, 1)
         if normal_vector_l is not None:
             # Tracking success 
             p3 = (int(bbox2[0]), int(bbox2[1]))
             p4 = (int(bbox2[0] + bbox2[2]), int(bbox2[1] + bbox2[3]))
-        cv2.rectangle(new_frame, p3, p4, (0,0,255), 2, 1)
+        cv2.rectangle(image, p3, p4, (0,0,255), 2, 1)
 
         # #Check collisions
         # is_col_bbox1 = pong.check_bbox(bbox)
@@ -121,11 +121,11 @@ def main():
 
 
         pong.check_boundaries()
-        pong.draw(new_frame)
-        show_frame = cv2.flip(new_frame, 1)
+        pong.draw(image)
+        image = cv2.flip(image, 1)
 
         # Display result
-        cv2.imshow("Pong", show_frame)
+        cv2.imshow("Pong", image)
  
         # Exit if ESC pressed
         k = cv2.waitKey(1) & 0xff
