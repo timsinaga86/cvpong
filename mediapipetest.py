@@ -142,7 +142,7 @@ def main():
         k = cv2.waitKey(1) & 0xff
         if k == 27 : break
         if k == ord('r'): pong.reset()
-        if k = ord('s'): 
+        if k == ord('s'): 
             cv2.imwrite("test"+str(count)+".png", image)
             count += 1
 
